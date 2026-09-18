@@ -2,7 +2,7 @@ import os
 import datetime
 import re
 import json
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -14,8 +14,7 @@ if not api_key:
     print("Error: GEMINI_API_KEY environment variable is not set. Please set it in a .env file or environment.")
     exit(1)
 
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-3.6-flash')
+client = genai.Client(api_key=api_key)
 
 def get_existing_articles():
     content_dir = os.path.join(os.path.dirname(__file__), '..', 'website', 'content')
@@ -48,7 +47,10 @@ Renvoie UNIQUEMENT un objet JSON valide avec les clés suivantes :
 - "description": une brève description de ce que fait l'outil
 - "long_tail_keyword": un mot clé de longue traîne très spécifique pour lequel on veut ranker (ex: "Meilleure IA pour générer des plans d'architecture")
 """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-3.6-flash',
+        contents=prompt
+    )
     try:
         # Extract json block if wrapped in markdown
         text = response.text
@@ -94,7 +96,10 @@ Ensuite, rédige l'article avec la structure suivante :
 
 Sois professionnel, naturel, et optimise pour le mot-clé "{tool_data['long_tail_keyword']}".
 """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-3.6-flash',
+        contents=prompt
+    )
     return response.text
 
 def main():
