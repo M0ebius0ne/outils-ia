@@ -35,10 +35,9 @@ def load_affiliate_links():
 
 import time
 import random
-from google.genai.errors import APIError
+from google.genai import errors
 
 MAX_ATTEMPTS = 5
-RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 def generate_with_retry(client, model, contents):
     for attempt in range(MAX_ATTEMPTS):
@@ -47,20 +46,21 @@ def generate_with_retry(client, model, contents):
                 model=model,
                 contents=contents,
             )
-        except APIError as exc:
-            # Try to get status code from APIError
-            status_code = getattr(exc, "code", None)
+        except (errors.ServerError, errors.ClientError) as exc:
+            # Try to get status code
+            status_code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
             
-            if status_code not in RETRYABLE_STATUS_CODES:
+            if status_code not in (429, 500, 502, 503, 504):
                 raise
                 
             if attempt == MAX_ATTEMPTS - 1:
                 raise
                 
             # Exponential backoff with jitter
-            delay = min(60, 2 ** attempt) + random.uniform(0, 1)
+            delay = min(60, 2 ** attempt * 5) + random.uniform(0, 1)
             print(f"Gemini API returned {status_code}; retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_ATTEMPTS})")
             time.sleep(delay)
+    raise RuntimeError("Gemini request failed after all retries")
 
 def generate_article_idea(existing_articles):
     prompt = f"""

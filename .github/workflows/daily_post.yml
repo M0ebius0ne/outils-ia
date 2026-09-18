@@ -28,7 +28,14 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.6-flash
-        run: python scripts/autopilot.py
+        run: |
+          for attempt in 1 2 3; do
+            python scripts/autopilot.py && exit 0
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 30))
+            fi
+          done
+          exit 1
 
       - name: Build Pelican Site
         run: |
