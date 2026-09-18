@@ -1,0 +1,17 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pelican
+website/output/
+website/__pycache__/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/

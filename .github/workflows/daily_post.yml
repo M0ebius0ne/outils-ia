@@ -1,0 +1,49 @@
+name: Daily AI Autopilot
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every day
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  generate_and_publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to push new articles to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Autopilot Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/autopilot.py
+
+      - name: Build Pelican Site
+        run: |
+          cd website
+          pelican content -s publishconf.py
+
+      - name: Commit and push new article
+        run: |
+          git config --global user.name "AI Autopilot"
+          git config --global user.email "autopilot@ia-radar.github.io"
+          git add website/content/
+          git commit -m "🤖 Auto-generated new AI tool review" || echo "No changes to commit"
+          git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/output
