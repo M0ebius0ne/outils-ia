@@ -15,7 +15,7 @@ if not api_key:
     exit(1)
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = genai.GenerativeModel('gemini-3.6-flash')
 
 def get_existing_articles():
     content_dir = os.path.join(os.path.dirname(__file__), '..', 'website', 'content')
