@@ -46,20 +46,51 @@ def generate_with_retry(client, model, contents):
                 model=model,
                 contents=contents,
             )
-        except (errors.ServerError, errors.ClientError) as exc:
-            # Try to get status code
+        except errors.ClientError as exc:
             status_code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+            message = str(exc).lower()
             
-            if status_code not in (429, 500, 502, 503, 504):
+            # Permanent quota/billing exhaustion cannot be fixed by retrying.
+            if status_code == 429 and any(
+                phrase in message for phrase in (
+                    "exceeded your current quota",
+                    "check your plan and billing",
+                    "quota",
+                )
+            ):
+                raise RuntimeError(
+                    "Gemini quota exhausted. Check the API project billing and quotas."
+                ) from exc
+                
+            # Retry only temporary rate limits.
+            if status_code != 429:
                 raise
                 
             if attempt == MAX_ATTEMPTS - 1:
                 raise
                 
-            # Exponential backoff with jitter
             delay = min(60, 2 ** attempt * 5) + random.uniform(0, 1)
-            print(f"Gemini API returned {status_code}; retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_ATTEMPTS})")
+            print(
+                f"Temporary Gemini rate limit; retrying in "
+                f"{delay:.1f}s ({attempt + 1}/{MAX_ATTEMPTS})"
+            )
             time.sleep(delay)
+            
+        except errors.ServerError as exc:
+            status_code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+            if status_code not in (500, 502, 503, 504):
+                raise
+                
+            if attempt == MAX_ATTEMPTS - 1:
+                raise
+                
+            delay = min(60, 2 ** attempt * 5) + random.uniform(0, 1)
+            print(
+                f"Gemini server error {status_code}; retrying in "
+                f"{delay:.1f}s ({attempt + 1}/{MAX_ATTEMPTS})"
+            )
+            time.sleep(delay)
+            
     raise RuntimeError("Gemini request failed after all retries")
 
 def generate_article_idea(existing_articles):
