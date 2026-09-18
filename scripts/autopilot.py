@@ -33,6 +33,35 @@ def load_affiliate_links():
             return json.load(f)
     return {}
 
+import time
+import random
+from google.genai.errors import APIError
+
+MAX_ATTEMPTS = 5
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+
+def generate_with_retry(client, model, contents):
+    for attempt in range(MAX_ATTEMPTS):
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=contents,
+            )
+        except APIError as exc:
+            # Try to get status code from APIError
+            status_code = getattr(exc, "code", None)
+            
+            if status_code not in RETRYABLE_STATUS_CODES:
+                raise
+                
+            if attempt == MAX_ATTEMPTS - 1:
+                raise
+                
+            # Exponential backoff with jitter
+            delay = min(60, 2 ** attempt) + random.uniform(0, 1)
+            print(f"Gemini API returned {status_code}; retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_ATTEMPTS})")
+            time.sleep(delay)
+
 def generate_article_idea(existing_articles):
     prompt = f"""
 Tu es un expert en outils d'intelligence artificielle et en stratégie de référencement SEO "Longue Traîne" (Long-Tail).
@@ -48,10 +77,7 @@ Renvoie UNIQUEMENT un objet JSON valide avec les clés suivantes :
 - "description": une brève description de ce que fait l'outil
 - "long_tail_keyword": un mot clé de longue traîne très spécifique pour lequel on veut ranker (ex: "Meilleure IA pour générer des plans d'architecture")
 """
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt
-    )
+    response = generate_with_retry(client, model_name, prompt)
     try:
         # Extract json block if wrapped in markdown
         text = response.text
@@ -97,10 +123,7 @@ Ensuite, rédige l'article avec la structure suivante :
 
 Sois professionnel, naturel, et optimise pour le mot-clé "{tool_data['long_tail_keyword']}".
 """
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt
-    )
+    response = generate_with_retry(client, model_name, prompt)
     return response.text
 
 def main():
