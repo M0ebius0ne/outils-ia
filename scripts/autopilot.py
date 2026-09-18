@@ -15,6 +15,7 @@ if not api_key:
     exit(1)
 
 client = genai.Client(api_key=api_key)
+model_name = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
 def get_existing_articles():
     content_dir = os.path.join(os.path.dirname(__file__), '..', 'website', 'content')
@@ -48,7 +49,7 @@ Renvoie UNIQUEMENT un objet JSON valide avec les clés suivantes :
 - "long_tail_keyword": un mot clé de longue traîne très spécifique pour lequel on veut ranker (ex: "Meilleure IA pour générer des plans d'architecture")
 """
     response = client.models.generate_content(
-        model='gemini-3.6-flash',
+        model=model_name,
         contents=prompt
     )
     try:
@@ -97,7 +98,7 @@ Ensuite, rédige l'article avec la structure suivante :
 Sois professionnel, naturel, et optimise pour le mot-clé "{tool_data['long_tail_keyword']}".
 """
     response = client.models.generate_content(
-        model='gemini-3.6-flash',
+        model=model_name,
         contents=prompt
     )
     return response.text
