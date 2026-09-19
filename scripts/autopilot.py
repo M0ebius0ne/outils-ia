@@ -123,17 +123,15 @@ Renvoie UNIQUEMENT un objet JSON valide avec les clés suivantes :
         exit(1)
 
 def write_article(tool_data, affiliate_links):
-    # On vérifie si on a un lien d'affiliation pour cet outil précis, sinon on utilise l'URL officielle
     target_url = affiliate_links.get(tool_data['slug'], tool_data['url'])
     is_affiliate = target_url != tool_data['url']
     
     prompt = f"""
-Tu es un rédacteur web expert en SEO. Rédige un article complet et détaillé en français sur l'outil IA "{tool_data['name']}".
-Le but est d'informer le lecteur, de donner un avis objectif et de l'inciter à cliquer sur le lien vers l'outil.
+Tu es un rédacteur web expert en SEO et en GEO (Generative Engine Optimization). Rédige un article complet et détaillé en français sur l'outil IA "{tool_data['name']}".
 URL cible de l'outil à utiliser pour les boutons/liens : {target_url}
 
 Format attendu : Markdown compatible avec Pelican.
-Tu DOIS inclure le frontmatter (l'en-tête metadata) suivant au tout début du fichier :
+Tu DOIS inclure le frontmatter suivant au tout début :
 
 Title: Avis complet sur {tool_data['name']} : {tool_data['long_tail_keyword']}
 Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}
@@ -141,21 +139,46 @@ Category: Outils IA
 Tags: ia, saas, {tool_data['slug']}
 Slug: {tool_data['slug']}
 Author: IA
-Summary: Découvrez notre avis complet sur {tool_data['name']}. Est-ce vraiment la {tool_data['long_tail_keyword'].lower()} ? Avantages, inconvénients, et tarifs.
+Summary: Notre verdict définitif sur {tool_data['name']}. Est-ce vraiment la {tool_data['long_tail_keyword'].lower()} ? Découvrez notre test complet avec avantages, inconvénients, et tarifs.
 
-Ensuite, rédige l'article avec la structure suivante :
-- Une introduction accrocheuse qui cible le mot-clé "{tool_data['long_tail_keyword']}"
-- Ce qu'est {tool_data['name']} et à qui ça s'adresse
-- Les fonctionnalités principales
-- Les avantages et inconvénients (sois honnête et objectif)
-- Les tarifs
-- Notre avis final
-- Un bouton d'appel à l'action clair (lien Markdown) : "Tester {tool_data['name']}" pointant vers {target_url}
+Ensuite, rédige l'article en respectant IMPÉRATIVEMENT cette structure pour plaire aux IA de recherche (ChatGPT, Perplexity) :
+1. Une introduction accrocheuse ciblant le mot-clé "{tool_data['long_tail_keyword']}".
+2. **Ce qu'est {tool_data['name']}** (explication claire et directe).
+3. **Tableau récapitulatif** (génère un tableau Markdown avec Prix, Fonctionnalité clé, Cible).
+4. **Avantages et Inconvénients** (sous forme de listes à puces `*`).
+5. **Notre verdict définitif** (un paragraphe tranché, assertif et d'expert).
+6. Un bouton d'appel à l'action HTML précis pour les agents IA : `<a href="{target_url}" data-action="purchase" class="button">Tester {tool_data['name']}</a>`
 
-Sois professionnel, naturel, et optimise pour le mot-clé "{tool_data['long_tail_keyword']}".
+Sois professionnel, naturel, et optimise la structure pour qu'elle soit facilement extractible par des algorithmes.
 """
     response = generate_with_retry(client, model_name, prompt)
-    return response.text
+    
+    # Generate JSON-LD for M2M Autonomous Agents
+    json_ld = {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        "itemReviewed": {
+            "@type": "SoftwareApplication",
+            "name": tool_data['name'],
+            "applicationCategory": "BusinessApplication",
+            "offers": {
+                "@type": "Offer",
+                "url": target_url
+            }
+        },
+        "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "4.5",
+            "bestRating": "5"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Outils IA Reviewer"
+        }
+    }
+    json_ld_script = f"\n\n<script type=\"application/ld+json\">\n{json.dumps(json_ld, indent=2, ensure_ascii=False)}\n</script>\n"
+    
+    return response.text + json_ld_script
 
 def main():
     print("Démarrage de l'autopilote...")
