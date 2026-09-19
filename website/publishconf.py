@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.curdir)
 from pelicanconf import *
 
-SITEURL = 'https://M0ebius0ne.github.io/outils-ia'
+SITEURL = 'https://m0ebius0ne.github.io/outils-ia'
 RELATIVE_URLS = False
 
 FEED_ALL_ATOM = 'feeds/all.atom.xml'

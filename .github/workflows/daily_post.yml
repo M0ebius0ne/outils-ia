@@ -34,6 +34,7 @@ jobs:
         run: |
           cd website
           pelican content -s publishconf.py
+          touch output/.nojekyll
 
       - name: Commit and push new article
         run: |
