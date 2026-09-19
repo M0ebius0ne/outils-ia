@@ -1,5 +1,7 @@
-AUTHOR = "L'IA"
-SITENAME = 'AI Tools Radar'
+AUTHOR = "L'Équipe"
+SITENAME = "Outils IA Radar"
+SITESUBTITLE = "Les meilleurs outils d'Intelligence Artificielle"
+SITELOGO = "https://cdn-icons-png.flaticon.com/512/2814/2814666.png" # Icône IA libre de droits
 SITEURL = ''
 
 PATH = 'content'
@@ -18,14 +20,11 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
-# Blogroll
-LINKS = (('Pelican', 'https://getpelican.com/'),
-         ('Python.org', 'https://www.python.org/'),
-         ('Jinja2', 'https://palletsprojects.com/p/jinja/'),)
+# Blogroll (Liens de la barre latérale)
+LINKS = (('Outils Business', 'https://M0ebius0ne.github.io/outils-business/'),)
 
 # Social widget
-SOCIAL = (('Twitter', '#'),
-          ('GitHub', '#'),)
+SOCIAL = ()
 
 # SEO Clean URLs
 ARTICLE_URL = '{slug}/'
