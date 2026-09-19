@@ -1,6 +1,9 @@
 name: Daily AI Autopilot
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     # Runs at 08:00 UTC every day
     - cron: '0 8 * * *'
