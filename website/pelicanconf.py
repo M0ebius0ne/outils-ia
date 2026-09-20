@@ -43,4 +43,4 @@ DEFAULT_PAGINATION = 10
 
 # Compteur de visites (GoatCounter, gratuit). Laisser vide tant que le compte n'existe pas.
 # Exemple : GOATCOUNTER_SITE = "outils-ia"
-GOATCOUNTER_SITE = ""
+GOATCOUNTER_SITE = "moebiusone"
