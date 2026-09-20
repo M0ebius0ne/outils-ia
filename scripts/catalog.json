@@ -1,0 +1,31 @@
+{
+  "site": "outils-ia",
+  "audience": "Créateurs francophones qui ont un fichier audio et veulent un texte, des pistes ou un montage",
+  "policy": "Les URL officielles sont utilisées tant qu'un lien d'affiliation n'est pas dans scripts/affiliate_links.json. Pas de test inventé, pas de note.",
+  "tools": [
+    {
+      "id": "castmagic",
+      "name": "Castmagic",
+      "job": "réemploi d'épisode (transcription, notes, posts)",
+      "official_url": "https://www.castmagic.io",
+      "affiliate_status": "refused_can_reapply",
+      "notes": "Recandidater après un site réel et un peu de trafic mesuré."
+    },
+    {
+      "id": "lalal-ai",
+      "name": "LALAL.AI",
+      "job": "séparer voix / instrumental / stems",
+      "official_url": "https://www.lalal.ai",
+      "affiliate_status": "not_applied",
+      "apply_url": "https://www.lalal.ai/affiliate-program/"
+    },
+    {
+      "id": "descript",
+      "name": "Descript",
+      "job": "éditer l'audio comme un texte",
+      "official_url": "https://www.descript.com",
+      "affiliate_status": "not_applied",
+      "apply_url": "https://www.descript.com/affiliate"
+    }
+  ]
+}

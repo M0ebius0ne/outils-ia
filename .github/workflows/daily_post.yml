@@ -1,13 +1,9 @@
 name: Daily AI Autopilot
 
 on:
-  push:
-    branches:
-      - master
-  schedule:
-    # Runs at 08:00 UTC every day
-    - cron: '0 8 * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  # Plus de génération quotidienne ni de relance à chaque push.
+  # Relance manuelle seulement, depuis l’onglet Actions.
+  workflow_dispatch:
 
 jobs:
   generate_and_publish:

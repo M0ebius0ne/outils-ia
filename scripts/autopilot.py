@@ -2,11 +2,19 @@ import os
 import datetime
 import re
 import json
-from google import genai
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
+
+if __name__ == "__main__" and os.environ.get("AUTOPILOT_ENABLED", "").lower() not in (
+    "1",
+    "true",
+    "yes",
+):
+    print("Autopilot disabled. Set AUTOPILOT_ENABLED=1 to generate an article.")
+    raise SystemExit(0)
+
+from google import genai
 
 # Configure Gemini
 api_key = os.environ.get("GEMINI_API_KEY")
